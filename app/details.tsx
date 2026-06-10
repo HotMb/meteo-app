@@ -1,11 +1,13 @@
+// app/details.tsx
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, Button, Alert } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { View, Text, StyleSheet, ActivityIndicator, Button, Alert, ScrollView, TouchableOpacity } from 'react-native';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { City, WeatherDetails } from '../src/types';
 import { getWeatherForCoords } from '../src/services/weatherApi';
 import { getFavorites, saveFavorites } from '../src/services/favoritesStorage';
 
 export default function DetailsScreen() {
+  const router = useRouter();
   const params = useLocalSearchParams();
   const cityParam = params.city as string;
   const city: City = JSON.parse(cityParam);
@@ -54,55 +56,174 @@ export default function DetailsScreen() {
 
   if (isLoading || !weather) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator />
-        <Text>Chargement des données météo...</Text>
+      <View style={styles.loadingScreen}>
+        <ActivityIndicator color="#fff" />
+        <Text style={styles.loadingText}>Chargement des données météo...</Text>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.cityName}>{city.name}</Text>
-      <Text style={styles.country}>{city.country}</Text>
+    <View style={styles.screen}>
+      <ScrollView contentContainerStyle={styles.container}>
+        <TouchableOpacity onPress={() => router.back()}>
+          <Text style={styles.backText}>‹ Retour</Text>
+        </TouchableOpacity>
 
-      <View style={styles.section}>
-        <Text>Température actuelle : {weather.temperature}°C</Text>
-        <Text>Température ressentie : {weather.feelsLike}°C</Text>
-        <Text>Min : {weather.tempMin}°C</Text>
-        <Text>Max : {weather.tempMax}°C</Text>
-        <Text>Description : {weather.description}</Text>
-      </View>
+        {/* Carte principale */}
+        <View style={styles.mainCard}>
+          <Text style={styles.cityName}>{city.name}</Text>
+          <Text style={styles.country}>{city.country}</Text>
 
-      <View style={styles.section}>
-        <Text>Humidité : {weather.humidity}%</Text>
-        <Text>Vitesse du vent : {weather.windSpeed} km/h</Text>
-        <Text>Direction du vent : {weather.windDirection}°</Text>
-        <Text>Pression : {weather.pressure} hPa</Text>
-        <Text>Pluie : {weather.rain} mm</Text>
-      </View>
+          {/* Ici tu pourras ajouter une icône météo plus tard */}
+          <Text style={styles.bigTemp}>{Math.round(weather.temperature)}°</Text>
+          <Text style={styles.description}>{weather.description}</Text>
+          <Text style={styles.feelsLike}>Ressenti : {Math.round(weather.feelsLike)}°</Text>
+        </View>
 
-      <View style={styles.section}>
-        <Text>Lever du soleil : {weather.sunrise}</Text>
-        <Text>Coucher du soleil : {weather.sunset}</Text>
-      </View>
+        {/* Détails météo */}
+        <Text style={styles.sectionTitle}>DÉTAILS MÉTÉO</Text>
+        <View style={styles.detailsCard}>
+          <DetailRow label="Min / Max" value={`${Math.round(weather.tempMin)}° / ${Math.round(weather.tempMax)}°`} />
+          <DetailRow label="Humidité" value={`${weather.humidity}%`} />
+          <DetailRow label="Vent" value={`${weather.windSpeed} km/h`} />
+          <DetailRow label="Direction" value={`${weather.windDirection}°`} />
+          <DetailRow label="Pression" value={`${weather.pressure} hPa`} />
+          <DetailRow label="Pluie" value={`${weather.rain} mm`} />
+          <DetailRow label="Lever du soleil" value={weather.sunrise} />
+          <DetailRow label="Coucher du soleil" value={weather.sunset} />
+        </View>
 
-      <View style={styles.section}>
-        <Text>Dernière mise à jour : {weather.lastUpdated}</Text>
-      </View>
+        <Text style={styles.updateText}>Dernière mise à jour : {weather.lastUpdated}</Text>
 
-      <Button
-        title={isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}
-        onPress={handleToggleFavorite}
-      />
+        {/* Bouton favoris */}
+        <TouchableOpacity
+          style={[styles.favoriteButton, isFavorite ? styles.favoriteButtonRemove : styles.favoriteButtonAdd]}
+          onPress={handleToggleFavorite}
+        >
+          <Text style={styles.favoriteButtonText}>
+            {isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+          </Text>
+        </TouchableOpacity>
+      </ScrollView>
     </View>
   );
 }
 
+type DetailRowProps = {
+  label: string;
+  value: string | number;
+};
+
+const DetailRow: React.FC<DetailRowProps> = ({ label, value }) => (
+  <View style={styles.detailRow}>
+    <Text style={styles.detailLabel}>{label}</Text>
+    <Text style={styles.detailValue}>{value}</Text>
+  </View>
+);
+
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16 },
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  cityName: { fontSize: 28, fontWeight: 'bold' },
-  country: { fontSize: 18, marginBottom: 16 },
-  section: { marginTop: 12, marginBottom: 8 },
+  screen: {
+    flex: 1,
+    backgroundColor: '#05224c',
+  },
+  loadingScreen: {
+    flex: 1,
+    backgroundColor: '#05224c',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    color: '#ffffff',
+    marginTop: 8,
+  },
+  container: {
+    padding: 16,
+    paddingBottom: 32,
+  },
+  backText: {
+    color: '#b0c4de',
+    marginBottom: 16,
+  },
+  mainCard: {
+    backgroundColor: '#0c315f',
+    borderRadius: 24,
+    padding: 24,
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  cityName: {
+    color: '#ffffff',
+    fontSize: 24,
+    fontWeight: '700',
+  },
+  country: {
+    color: '#b0c4de',
+    fontSize: 14,
+    marginTop: 4,
+    marginBottom: 16,
+  },
+  bigTemp: {
+    color: '#ffffff',
+    fontSize: 56,
+    fontWeight: '700',
+  },
+  description: {
+    color: '#ffffff',
+    fontSize: 18,
+    marginTop: 8,
+  },
+  feelsLike: {
+    color: '#b0c4de',
+    fontSize: 14,
+    marginTop: 4,
+  },
+  sectionTitle: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 8,
+  },
+  detailsCard: {
+    backgroundColor: '#0c315f',
+    borderRadius: 24,
+    padding: 16,
+    marginBottom: 16,
+  },
+  detailRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 6,
+  },
+  detailLabel: {
+    color: '#b0c4de',
+    fontSize: 14,
+  },
+  detailValue: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  updateText: {
+    color: '#b0c4de',
+    fontSize: 12,
+    marginTop: 4,
+    marginBottom: 16,
+  },
+  favoriteButton: {
+    borderRadius: 999,
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+  favoriteButtonAdd: {
+    backgroundColor: '#1e90ff',
+  },
+  favoriteButtonRemove: {
+    backgroundColor: '#ff6b6b',
+  },
+  favoriteButtonText: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
 });

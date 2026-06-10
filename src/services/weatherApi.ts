@@ -1,10 +1,19 @@
+// src/services/weatherApi.ts
 import axios from 'axios';
 import { City, WeatherDetails } from '../types';
 
 const GEO_BASE_URL = 'https://geocoding-api.open-meteo.com/v1/search';
 const WEATHER_BASE_URL = 'https://api.open-meteo.com/v1/forecast';
 
-// Cherche une ville par son nom
+function formatTime(isoString: string): string {
+  // Ex: "2026-06-10T05:14" -> "05:14"
+  const date = new Date(isoString);
+  const hours = date.getHours().toString().padStart(2, '0');
+  const minutes = date.getMinutes().toString().padStart(2, '0');
+  return `${hours}:${minutes}`;
+}
+
+// Cherche une ville par son nom (1 résultat)
 export async function searchCityByName(name: string): Promise<City | null> {
   const response = await axios.get(GEO_BASE_URL, {
     params: {
@@ -38,7 +47,7 @@ export async function searchCitiesByName(name: string, limit = 5): Promise<City[
   const response = await axios.get(GEO_BASE_URL, {
     params: {
       name,
-      count: limit,      // nombre max de résultats
+      count: limit,
       language: 'fr',
       format: 'json',
     },
@@ -70,6 +79,7 @@ export async function getWeatherForCoords(
       latitude,
       longitude,
       current:
+        // SANS "time" sinon 400 Bad Request
         'temperature_2m,apparent_temperature,relative_humidity_2m,pressure_msl,wind_speed_10m,wind_direction_10m,precipitation',
       daily: 'temperature_2m_max,temperature_2m_min,sunrise,sunset',
       timezone: 'auto',
@@ -85,15 +95,16 @@ export async function getWeatherForCoords(
     feelsLike: current.apparent_temperature,
     tempMin: daily.temperature_2m_min[0],
     tempMax: daily.temperature_2m_max[0],
-    description: 'Conditions météo actuelles', // tu peux raffiner plus tard
+    description: 'Conditions météo actuelles',
     humidity: current.relative_humidity_2m,
     windSpeed: current.wind_speed_10m,
     windDirection: current.wind_direction_10m,
     pressure: current.pressure_msl,
     rain: current.precipitation ?? 0,
-    sunrise: daily.sunrise[0],
-    sunset: daily.sunset[0],
-    lastUpdated: current.time,
+    sunrise: formatTime(daily.sunrise[0]),
+    sunset: formatTime(daily.sunset[0]),
+    // "time" est renvoyé par l’API même si on ne le met pas dans current
+    lastUpdated: formatTime(current.time),
   };
 
   return details;

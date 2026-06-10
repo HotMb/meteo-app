@@ -1,28 +1,21 @@
-import { Storage } from 'expo-storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { City } from '../types';
 
-const KEY = 'favorites';
+const KEY = '@meteo/favorites';
 
 export async function getFavorites(): Promise<City[]> {
+  const json = await AsyncStorage.getItem(KEY);
+  if (!json) return [];
+
   try {
-    const json = await Storage.getItem({ key: KEY });
-    if (!json) return [];
     const parsed = JSON.parse(json);
     return Array.isArray(parsed) ? parsed : [];
-  } catch (e) {
-    console.log('Erreur lecture favoris', e);
+  } catch {
     return [];
   }
 }
 
 export async function saveFavorites(favorites: City[]): Promise<void> {
-  try {
-    const json = JSON.stringify(favorites);
-    await Storage.setItem({
-      key: KEY,
-      value: json,
-    });
-  } catch (e) {
-    console.log('Erreur sauvegarde favoris', e);
-  }
+  const json = JSON.stringify(favorites);
+  await AsyncStorage.setItem(KEY, json);
 }
