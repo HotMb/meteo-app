@@ -1,50 +1,40 @@
-# Welcome to your Expo app 👋
+# Météo
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Application mobile développée avec React Native et Expo. Elle affiche la météo d'une ville, permet de chercher des lieux et conserve une liste de favoris sur l'appareil.
 
-## Get started
+## Parcours disponibles
 
-1. Install dependencies
+- Météo de la position actuelle après autorisation de géolocalisation.
+- Recherche d'une ville et suggestions après trois caractères.
+- Détail des températures, de l'humidité et des conditions météo.
+- Ajout et retrait de villes favorites, enregistrées avec AsyncStorage.
 
-   ```bash
-   npm install
-   ```
+Les données viennent des API Open-Meteo de géocodage et de prévision. L'application n'a pas besoin d'une clé API côté client.
 
-2. Start the app
+## Stack
 
-   ```bash
-   npx expo start
-   ```
+React Native 0.81 · React 19 · Expo SDK 54 · Expo Router · TypeScript · Axios · AsyncStorage · Expo Location
 
-In the output, you'll find options to open the app in a
+## Lancer le projet
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+Prérequis : Node.js et npm.
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+    npm install
+    npm start
 
-## Get a fresh project
+Pour ouvrir une cible particulière :
 
-When you're ready, run:
+    npm run android
+    npm run ios
+    npm run web
 
-```bash
-npm run reset-project
-```
+## Structure
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+- app/index.tsx : météo de la position et recherche de villes.
+- app/details.tsx : détail météo et gestion des favoris.
+- src/services/weatherApi.ts : appels aux API Open-Meteo.
+- src/services/favoritesStorage.ts : stockage local des favoris.
 
-## Learn more
+Le dépôt reste un projet d'application mobile. Il ne fournit pas de service météo côté serveur.
 
-To learn more about developing your project with Expo, look at the following resources:
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
