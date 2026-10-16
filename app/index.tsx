@@ -146,7 +146,7 @@ export default function HomeScreen() {
     <View style={styles.screen}>
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.appTitle}>Météo</Text>
-        <Text style={styles.subtitle}>Vos villes en un coup d'œil</Text>
+        <Text style={styles.subtitle}>Vos villes en un coup d&apos;œil</Text>
 
         {/* Barre de recherche */}
         <View style={styles.searchCard}>
